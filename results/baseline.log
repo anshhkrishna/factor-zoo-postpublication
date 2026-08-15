@@ -1,0 +1,17 @@
+factor-zoo-postpublication: baseline placebo
+Series that were never published as anomalies, split at the same
+publication years used for the tested factors, restricted to each
+factor's own date range. Decay here reflects only the fact that
+different multi-decade windows differ, not any publication effect.
+
+placebo     pub_year   in_sharpe  out_sharpe     ratio
+Mkt-RF          1992       0.400       0.602     1.503   (placebo for SMB, 192607-202606)
+FF3             1992       0.488       0.546     1.120   (placebo for SMB, 192607-202606)
+Mkt-RF          1992       0.400       0.602     1.503   (placebo for HML, 192607-202606)
+FF3             1992       0.488       0.546     1.120   (placebo for HML, 192607-202606)
+Mkt-RF          1993       0.399       0.597     1.496   (placebo for Mom, 192701-202606)
+FF3             1993       0.497       0.517     1.040   (placebo for Mom, 192701-202606)
+Mkt-RF          2013       0.387       0.795     2.054   (placebo for RMW, 196307-202606)
+FF3             2013       0.650       0.395     0.609   (placebo for RMW, 196307-202606)
+Mkt-RF          2008       0.299       0.905     3.025   (placebo for CMA, 196307-202606)
+FF3             2008       0.627       0.529     0.844   (placebo for CMA, 196307-202606)
