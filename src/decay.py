@@ -58,17 +58,81 @@ def randomly_signed_factor(values, block_size, rng):
     return values * block_signs
 
 
-def noise_floor_decay_ratios(dates, values, publication_year, block_size, n_draws, rng):
-    """Decay ratios from n_draws independent randomly-signed-factor controls.
+def noise_floor_stats(dates, values, publication_year, block_size, n_draws, rng):
+    """In-sample Sharpe, out-of-sample Sharpe, and ratio from n_draws
+    independent randomly-signed-factor controls.
 
     Runs each synthetic draw through the identical in-sample/out-of-sample
-    split and publication-year cutoff as decay_ratio, giving a distribution
-    of decay ratios a real factor's own ratio can be compared against. A
-    factor with zero true directional edge produces this distribution by
-    construction, so it is the noise floor.
+    split and publication-year cutoff as decay_ratio, giving distributions a
+    real factor's own in-sample Sharpe, out-of-sample Sharpe, or ratio can
+    each be compared against. A factor with zero true directional edge
+    produces these distributions by construction, so they are the noise
+    floor.
     """
+    in_sharpes = np.empty(n_draws)
+    out_sharpes = np.empty(n_draws)
     ratios = np.empty(n_draws)
     for i in range(n_draws):
         synthetic = randomly_signed_factor(values, block_size, rng)
-        _, _, ratios[i] = decay_ratio(dates, synthetic, publication_year)
+        in_sample, out_sample = split_in_out_sample(dates, synthetic, publication_year)
+        in_sharpes[i] = annualized_sharpe(in_sample)
+        out_sharpes[i] = annualized_sharpe(out_sample)
+        ratios[i] = out_sharpes[i] / in_sharpes[i]
+    return in_sharpes, out_sharpes, ratios
+
+
+def noise_floor_decay_ratios(dates, values, publication_year, block_size, n_draws, rng):
+    """Decay ratios from n_draws independent randomly-signed-factor controls.
+
+    Thin wrapper around noise_floor_stats for callers that only need the
+    ratio distribution.
+    """
+    _, _, ratios = noise_floor_stats(dates, values, publication_year, block_size, n_draws, rng)
+    return ratios
+
+
+def _block_partition(values, block_size):
+    """Split values into contiguous, non-overlapping chunks of block_size."""
+    return [values[i : i + block_size] for i in range(0, len(values), block_size)]
+
+
+def block_bootstrap_sharpe(values, block_size, n_draws, rng):
+    """Block-bootstrap distribution of the annualized Sharpe of one series.
+
+    Resamples the series' own block_size-month blocks with replacement
+    (drawing as many blocks as the original partition has, then trimming
+    back to the original length) and recomputes annualized_sharpe on each
+    resample, giving a sampling-uncertainty distribution around the point
+    estimate.
+    """
+    blocks = _block_partition(values, block_size)
+    n = len(values)
+    n_blocks = len(blocks)
+    sharpes = np.empty(n_draws)
+    for i in range(n_draws):
+        idx = rng.integers(0, n_blocks, size=n_blocks)
+        resampled = np.concatenate([blocks[j] for j in idx])[:n]
+        sharpes[i] = annualized_sharpe(resampled)
+    return sharpes
+
+
+def block_bootstrap_ratio(in_values, out_values, block_size, n_draws, rng):
+    """Block-bootstrap distribution of the decay ratio.
+
+    Resamples the in-sample and out-of-sample blocks independently on each
+    draw (matching how the two halves were actually observed) and
+    recomputes the ratio of their annualized Sharpes.
+    """
+    in_blocks = _block_partition(in_values, block_size)
+    out_blocks = _block_partition(out_values, block_size)
+    n_in, n_out = len(in_values), len(out_values)
+    ratios = np.empty(n_draws)
+    for i in range(n_draws):
+        in_idx = rng.integers(0, len(in_blocks), size=len(in_blocks))
+        out_idx = rng.integers(0, len(out_blocks), size=len(out_blocks))
+        in_resampled = np.concatenate([in_blocks[j] for j in in_idx])[:n_in]
+        out_resampled = np.concatenate([out_blocks[j] for j in out_idx])[:n_out]
+        in_sharpe = annualized_sharpe(in_resampled)
+        out_sharpe = annualized_sharpe(out_resampled)
+        ratios[i] = out_sharpe / in_sharpe
     return ratios
