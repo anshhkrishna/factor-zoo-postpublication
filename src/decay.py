@@ -40,3 +40,35 @@ def decay_ratio(dates, values, publication_year):
     in_sharpe = annualized_sharpe(in_sample)
     out_sharpe = annualized_sharpe(out_sample)
     return in_sharpe, out_sharpe, out_sharpe / in_sharpe
+
+
+def randomly_signed_factor(values, block_size, rng):
+    """Generate one synthetic no-edge series matched to values' volatility.
+
+    Multiplies each contiguous block of block_size months by an independent
+    +/-1 draw. This preserves the series' own volatility and short-horizon
+    autocorrelation (within a block, nothing is reordered) while destroying
+    any consistent directional edge across blocks, since the sign of any
+    multi-block trend is randomized away.
+    """
+    n = len(values)
+    n_blocks = -(-n // block_size)  # ceil division
+    signs = rng.choice([-1.0, 1.0], size=n_blocks)
+    block_signs = np.repeat(signs, block_size)[:n]
+    return values * block_signs
+
+
+def noise_floor_decay_ratios(dates, values, publication_year, block_size, n_draws, rng):
+    """Decay ratios from n_draws independent randomly-signed-factor controls.
+
+    Runs each synthetic draw through the identical in-sample/out-of-sample
+    split and publication-year cutoff as decay_ratio, giving a distribution
+    of decay ratios a real factor's own ratio can be compared against. A
+    factor with zero true directional edge produces this distribution by
+    construction, so it is the noise floor.
+    """
+    ratios = np.empty(n_draws)
+    for i in range(n_draws):
+        synthetic = randomly_signed_factor(values, block_size, rng)
+        _, _, ratios[i] = decay_ratio(dates, synthetic, publication_year)
+    return ratios
