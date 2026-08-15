@@ -1,0 +1,31 @@
+factor-zoo-postpublication: rigor checks on the decay comparison
+noise_seed=20260815 bootstrap_seed=20260816 block_size=12 n_draws=1000
+
+Block-bootstrap CIs (resampling the factor's own observed blocks with
+replacement -- sampling uncertainty around the point estimate):
+
+factor    out_sharpe     ci_lo     ci_hi     ratio  ratio_ci_lo  ratio_ci_hi
+SMB            0.048    -0.201     0.338     0.191       -2.407        2.649
+HML            0.196    -0.248     0.594     0.474       -0.701        1.999
+Mom            0.293    -0.072     0.733     0.534       -0.214        1.882
+RMW            0.211    -0.414     0.782     0.518       -1.591        3.296
+CMA            0.036    -0.642     0.566     0.064       -1.534        1.263
+
+Noise-floor comparisons (randomly-signed synthetic controls, matched
+volatility, zero true edge -- same draws used in the decay experiment log):
+
+factor       ratio   ratio_outside_range  out_sharpe    noise_sharpe_range   indistinguishable
+SMB          0.191                 False       0.048        [-0.267,0.272]                True
+HML          0.474                 False       0.196        [-0.443,0.457]                True
+Mom          0.534                 False       0.293        [-0.325,0.376]                True
+RMW          0.518                 False       0.211        [-0.616,0.635]                True
+CMA          0.064                 False       0.036        [-0.472,0.484]                True
+
+average real decay ratio across the five factors: 0.356
+pooled noise-floor ratio distribution (5x1000 draws) [p2.5, p97.5]: [-18.674, 19.933]
+average real ratio sits at the 58.5th percentile of the pooled noise floor (inside the 95% range)
+
+0/5 factors have a decay ratio outside their own noise floor's 95% range (see the module docstring for why this framing is close to uninformative here)
+5/5 factors have an out-of-sample Sharpe statistically indistinguishable from a no-edge noise floor of matched volatility -- this is the comparison used for the core-claim test
+
+elapsed: 1.38s
