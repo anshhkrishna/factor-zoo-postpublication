@@ -10,9 +10,7 @@ import os
 
 import numpy as np
 
-_DATA_DIR = os.path.join(
-    os.path.dirname(__file__), "..", "..", "..", "data", "ken-french"
-)
+_DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "ken-french")
 
 THREE_FACTOR_PATH = os.path.join(_DATA_DIR, "F-F_Research_Data_Factors.csv")
 FIVE_FACTOR_PATH = os.path.join(_DATA_DIR, "F-F_Research_Data_5_Factors_2x3.csv")

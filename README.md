@@ -124,9 +124,10 @@ relative to splitting at the true first mention.
 onward), `F-F_Research_Data_5_Factors_2x3.csv` (adds RMW, CMA, monthly, 1963-07 onward),
 `F-F_Momentum_Factor.csv` (momentum, monthly, 1927-01 onward), and `25_Portfolios_5x5.csv`
 (used only as a parser sanity check - a hand-built value-minus-growth spread from the 25
-portfolios correlates with the official HML series at r=0.91). None of these files are
-copied into this directory; `src/data.py` reads them in place from `data/ken-french/`
-two levels up.
+portfolios correlates with the official HML series at r=0.91). All four are committed
+under `data/ken-french/`, so the repo reproduces with no network access and no account.
+`data/MANIFEST.tsv` records each file's size, SHA-256, source URL, and retrieval date,
+and `data/README.md` documents the parse quirks.
 
 The five tested factors (SMB, HML, momentum, RMW, CMA) are Ken French's own
 constructions, not independently rebuilt from raw stock-level data - rebuilding them
