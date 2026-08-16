@@ -139,3 +139,9 @@ src/rigor.py        bootstrap cis + the core-claim comparison -> results/rigor.l
 src/plot.py         results/headline.png from the three logs above
 tests/              data-parsing checks and the core-claim test
 ```
+
+## license
+
+mit, and it covers the code only. the vendored ken french csvs remain the work of
+eugene fama and kenneth french under the data library's own terms — see
+[`data/README.md`](data/README.md).
